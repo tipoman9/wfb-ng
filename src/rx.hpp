@@ -39,8 +39,14 @@ typedef enum {
 class BaseAggregator
 {
 public:
+    uint32_t count_p_gross_ttl;
+    uint32_t Recvd_ttl;
+    uint16_t count_p_last_seq_no;
+    uint16_t count_p_missed_seq_no;
+
     virtual void process_packet(const uint8_t *buf, size_t size, uint8_t wlan_idx, const uint8_t *antenna, const int8_t *rssi, sockaddr_in *sockaddr) = 0;
     virtual void dump_stats(FILE *fp) = 0;
+
 protected:
     int open_udp_socket_for_tx(const std::string &client_addr, int client_port)
     {
@@ -64,7 +70,7 @@ protected:
 
 class Forwarder : public BaseAggregator
 {
-public:
+public:    
     Forwarder(const std::string &client_addr, int client_port);
     ~Forwarder();
     virtual void process_packet(const uint8_t *buf, size_t size, uint8_t wlan_idx, const uint8_t *antenna, const int8_t *rssi, sockaddr_in *sockaddr);
@@ -118,10 +124,13 @@ typedef std::unordered_map<uint64_t, antennaItem> antenna_stat_t;
 class Aggregator : public BaseAggregator
 {
 public:
+    
     Aggregator(const std::string &client_addr, int client_port, const std::string &keypair, uint64_t epoch, uint32_t channel_id);
     ~Aggregator();
     virtual void process_packet(const uint8_t *buf, size_t size, uint8_t wlan_idx, const uint8_t *antenna, const int8_t *rssi, sockaddr_in *sockaddr);
     virtual void dump_stats(FILE *fp);
+    
+
 private:
     void init_fec(int k, int n);
     void deinit_fec(void);
@@ -148,6 +157,7 @@ private:
     uint8_t session_key[crypto_aead_chacha20poly1305_KEYBYTES];
 
     antenna_stat_t antenna_stat;
+   
     uint32_t count_p_all;
     uint32_t count_p_dec_err;
     uint32_t count_p_dec_ok;

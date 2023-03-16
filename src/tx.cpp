@@ -211,6 +211,9 @@ void Transmitter::send_block_fragment(size_t packet_size)
     {
         throw runtime_error("Unable to encrypt packet!");
     }
+    
+    ttl_pckts++;
+    ttl_bytes+=sizeof(wblock_hdr_t) + ciphertext_len;
 
     inject_packet(ciphertext, sizeof(wblock_hdr_t) + ciphertext_len);
 }
@@ -283,6 +286,9 @@ void data_source(shared_ptr<Transmitter> &t, vector<int> &rx_fd, int poll_timeou
     }
 
     uint64_t session_key_announce_ts = 0;
+    uint32_t bytes_ttl=0;
+    uint32_t pckts_ttl=0;
+    uint32_t free_slots=-1;
 
     for(;;)
     {
@@ -313,16 +319,35 @@ void data_source(shared_ptr<Transmitter> &t, vector<int> &rx_fd, int poll_timeou
                 ssize_t rsize;
                 int fd = rx_fd[i];
 
-                t->select_output(i);
+                t->select_output(i);                
+                free_slots++;
+                //fprintf(stderr, "Start read: \n");                
+
                 while((rsize = recv(fd, buf, sizeof(buf), 0)) >= 0)
                 {
+                    bytes_ttl+=rsize;
+                    pckts_ttl++;
                     uint64_t cur_ts = get_time_ms();
+
                     if (cur_ts >= session_key_announce_ts)
                     {
+
+                        //poll for waiting data
+                        uint32_t bytes_available = 1;// recv(fd, buf, 1024*1024, MSG_PEEK);
+                        ioctl(fd, FIONREAD, &bytes_available);
+                        //if (bytes_available>1500)//tisho
+                        fprintf(stderr, "Sent:%d / %d KB/s. Packets:%d/%d free slots:%d Waiting:%d \n", bytes_ttl/1024, t->ttl_bytes/1024, pckts_ttl,t->ttl_pckts, free_slots, bytes_available);
+                        bytes_ttl=0;
+                        pckts_ttl=0;
+                        free_slots=0;
+                        t->ttl_pckts=0;
+                        t->ttl_bytes=0;
+
                         // Announce session key
                         t->send_session_key();
                         session_key_announce_ts = cur_ts + SESSION_KEY_ANNOUNCE_MSEC;
                     }
+
                     t->send_packet(buf, rsize, 0);
                 }
                 if(errno != EWOULDBLOCK) throw runtime_error(string_format("Error receiving packet: %s", strerror(errno)));
@@ -347,10 +372,11 @@ int main(int argc, char * const *argv)
     int mcs_index = 1;
     int debug_port = 0;
     int poll_timeout = 0;
+    int recv_buff_sizeKb = 0; 
 
     string keypair = "tx.key";
 
-    while ((opt = getopt(argc, argv, "K:k:n:u:r:p:B:G:S:L:M:D:T:i:e:")) != -1) {
+    while ((opt = getopt(argc, argv, "K:k:n:u:r:p:B:G:S:L:M:D:T:i:e:F:")) != -1) {
         switch (opt) {
         case 'K':
             keypair = optarg;
@@ -388,6 +414,11 @@ int main(int argc, char * const *argv)
         case 'T':
             poll_timeout = atoi(optarg);
             break;
+
+        case 'F':
+            recv_buff_sizeKb = atoi(optarg);
+            break;
+
         case 'i':
             link_id = ((uint32_t)atoi(optarg)) & 0xffffff;
             break;
@@ -401,7 +432,7 @@ int main(int argc, char * const *argv)
             fprintf(stderr, "Default: K='%s', k=%d, n=%d, udp_port=%d, link_id=0x%06x, radio_port=%u, epoch=%" PRIu64 ", bandwidth=%d guard_interval=%s stbc=%d ldpc=%d mcs_index=%d, poll_timeout=%d\n",
                     keypair.c_str(), k, n, udp_port, link_id, radio_port, epoch, bandwidth, short_gi ? "short" : "long", stbc, ldpc, mcs_index, poll_timeout);
             fprintf(stderr, "Radio MTU: %lu\n", (unsigned long)MAX_PAYLOAD_SIZE);
-            fprintf(stderr, "WFB-ng version " WFB_VERSION "\n");
+            fprintf(stderr, "WFB-ng version ");
             fprintf(stderr, "WFB-ng home page: <http://wfb-ng.org>\n");
             exit(1);
         }
@@ -485,7 +516,20 @@ int main(int argc, char * const *argv)
         for(int i = 0; optind + i < argc; i++)
         {
             int fd = open_udp_socket_for_rx(udp_port + i);
-            fprintf(stderr, "Listen on %d for %s\n", udp_port + i, argv[optind + i]);
+
+            int buffer_size=recv_buff_sizeKb * 1024;
+            socklen_t optlen = sizeof(buffer_size);
+
+            if (recv_buff_sizeKb>0){            
+                setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &buffer_size, optlen);
+                fprintf(stderr,"Recv buffer set to %d bytes.\n",buffer_size);
+            }
+
+            buffer_size=0;            
+            getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &buffer_size, &optlen);
+            //printf("Socket receive buffer size: %d\n", buffer_size);
+
+            fprintf(stderr, "Listen on %d for %s buf size:%d bytes \n", udp_port + i, argv[optind + i],buffer_size);
             rx_fd.push_back(fd);
             wlans.push_back(string(argv[optind + i]));
         }

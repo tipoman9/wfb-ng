@@ -107,6 +107,12 @@ void Receiver::loop_iter(void)
         if (pkt == NULL) {
             break;
         }
+        
+        
+
+        Aggregator *dAgg = static_cast<Aggregator*>(agg); 
+        //dAgg->count_p_gross_ttl++;
+        agg->count_p_gross_ttl++;
 
         int pktlen = hdr.caplen;
         // int pkt_rate = 0
@@ -186,6 +192,18 @@ void Receiver::loop_iter(void)
         /* discard the radiotap header part */
         pkt += iterator._max_length;
         pktlen -= iterator._max_length;
+
+        uint16_t seqNo=pkt[FRAME_SEQ_HB];
+        seqNo=(seqNo<<(8-4)) | (pkt[FRAME_SEQ_LB]>>4);//divide by 16
+
+        if (seqNo - dAgg->count_p_last_seq_no>1)
+            dAgg->count_p_missed_seq_no+=(seqNo - dAgg->count_p_last_seq_no)-1; // we can catch breakpoint here    
+
+        if (seqNo < dAgg->count_p_last_seq_no)//reversed order
+            dAgg->count_p_missed_seq_no+=1000; // we can catch breakpoint here    
+
+        dAgg->count_p_last_seq_no=seqNo;
+
 
         if (pktlen > (int)sizeof(ieee80211_header))
         {
@@ -402,7 +420,7 @@ void Aggregator::dump_stats(FILE *fp)
     }
     antenna_stat.clear();
 
-    fprintf(fp, "%" PRIu64 "\tPKT\t%u:%u:%u:%u:%u:%u\n", ts, count_p_all, count_p_dec_err, count_p_dec_ok, count_p_fec_recovered, count_p_lost, count_p_bad);
+    fprintf(fp, "%" PRIu64 "\tPKT\t%u:%u:%u:%u:%u:%u_=%u: %uKb\n", ts, count_p_all, count_p_dec_err, count_p_dec_ok, count_p_fec_recovered, count_p_lost, count_p_bad, /*this->count_p_gross_ttl ,*/ this->count_p_missed_seq_no, this->Recvd_ttl/1024);
     fflush(fp);
 
     if(count_p_override)
@@ -414,7 +432,7 @@ void Aggregator::dump_stats(FILE *fp)
     {
         fprintf(stderr, "%u packets lost\n", count_p_lost);
     }
-
+    
     count_p_all = 0;
     count_p_dec_err = 0;
     count_p_dec_ok = 0;
@@ -422,6 +440,9 @@ void Aggregator::dump_stats(FILE *fp)
     count_p_lost = 0;
     count_p_bad = 0;
     count_p_override = 0;
+    this->count_p_missed_seq_no=0;
+    this->count_p_gross_ttl=0;
+    this->Recvd_ttl=0;
 }
 
 
@@ -703,6 +724,7 @@ void Aggregator::send_packet(int ring_idx, int fragment_idx)
         count_p_bad += 1;
     }else if(!(flags & WFB_PACKET_FEC_ONLY))
     {
+        Recvd_ttl+=packet_size;
         send(sockfd, payload, packet_size, MSG_DONTWAIT);
     }
 }
@@ -921,11 +943,11 @@ int main(int argc, char* const *argv)
             break;
         default: /* '?' */
         show_usage:
-            fprintf(stderr, "Local receiver: %s [-K rx_key] [-c client_addr] [-u client_port] [-p radio_port] [-l log_interval] [-e epoch] [-i link_id] interface1 [interface2] ...\n", argv[0]);
+            fprintf(stderr, "T_E_S_T Local receiver: %s [-K rx_key] [-c client_addr] [-u client_port] [-p radio_port] [-l log_interval] [-e epoch] [-i link_id] interface1 [interface2] ...\n", argv[0]);
             fprintf(stderr, "Remote (forwarder): %s -f [-c client_addr] [-u client_port] [-p radio_port] [-i link_id] interface1 [interface2] ...\n", argv[0]);
             fprintf(stderr, "Remote (aggregator): %s -a server_port [-K rx_key] [-c client_addr] [-u client_port] [-l log_interval] [-p radio_port] [-e epoch] [-i link_id]\n", argv[0]);
             fprintf(stderr, "Default: K='%s', connect=%s:%d, link_id=0x%06x, radio_port=%u, epoch=%" PRIu64 ", log_interval=%d\n", keypair.c_str(), client_addr.c_str(), client_port, link_id, radio_port, epoch, log_interval);
-            fprintf(stderr, "WFB-ng version " WFB_VERSION "\n");
+            fprintf(stderr, "WFB-ng version  ");
             fprintf(stderr, "WFB-ng home page: <http://wfb-ng.org>\n");
             exit(1);
         }

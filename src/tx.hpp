@@ -37,6 +37,11 @@ public:
     void send_packet(const uint8_t *buf, size_t size, uint8_t flags);
     void send_session_key(void);
     virtual void select_output(int idx) = 0;
+
+    uint32_t ttl_pckts;
+    uint32_t ttl_bytes;
+
+
 protected:
     virtual void inject_packet(const uint8_t *buf, size_t size) = 0;
 
