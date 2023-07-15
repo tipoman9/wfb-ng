@@ -471,6 +471,7 @@ void Aggregator::process_packet(const uint8_t *buf, size_t size, uint8_t wlan_id
 
     if(size == 0) return;
 
+    Recvd_ttl+=size;
     if (size > MAX_FORWARDER_PACKET_SIZE)
     {
         fprintf(stderr, "Long packet (fec payload)\n");
@@ -724,7 +725,7 @@ void Aggregator::send_packet(int ring_idx, int fragment_idx)
         count_p_bad += 1;
     }else if(!(flags & WFB_PACKET_FEC_ONLY))
     {
-        Recvd_ttl+=packet_size;
+        //Recvd_ttl+=packet_size;
         send(sockfd, payload, packet_size, MSG_DONTWAIT);
     }
 }

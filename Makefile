@@ -6,8 +6,10 @@ SOURCE_DATE_EPOCH ?= $(shell git show -s --format="%ct" $(shell git rev-parse HE
 
 export VERSION COMMIT SOURCE_DATE_EPOCH
 
-_LDFLAGS := $(LDFLAGS) -lrt -lpcap -lsodium
-_CFLAGS := $(CFLAGS) -Wall -O2 -DWFB_VERSION='"$(VERSION)-$(shell /bin/bash -c '_tmp=$(COMMIT); echo $${_tmp::8}')"'
+_LDFLAGS := $(LDFLAGS) -lrt -lpcap -lsodium -g
+_CFLAGS := $(CFLAGS) -g -Wall -O2 -DWFB_VERSION='"$(VERSION)-$(shell /bin/bash -c '_tmp=$(COMMIT); echo $${_tmp::8}')"'
+
+
 
 all: all_bin gs.key test
 
@@ -21,13 +23,13 @@ gs.key: wfb_keygen
 	@if ! [ -f gs.key ]; then ./wfb_keygen; fi
 
 src/%.o: src/%.c src/*.h
-	$(CC) $(_CFLAGS) -std=gnu99 -c -o $@ $<
+	$(CC) $(_CFLAGS) -std=gnu99 -g -c -o $@ $<
 
 src/%.o: src/%.cpp src/*.hpp src/*.h
-	$(CXX) $(_CFLAGS) -std=gnu++11 -c -o $@ $<
+	$(CXX) $(_CFLAGS) -std=gnu++11 -g -c -o $@ $<
 
 wfb_rx: src/rx.o src/radiotap.o src/fec.o src/wifibroadcast.o
-	$(CXX) -o $@ $^ $(_LDFLAGS)
+	$(CXX) -g -o $@ $^ $(_LDFLAGS) 
 
 wfb_tx: src/tx.o src/fec.o src/wifibroadcast.o
 	$(CXX) -o $@ $^ $(_LDFLAGS)
