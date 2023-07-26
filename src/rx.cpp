@@ -474,7 +474,7 @@ void Aggregator::process_packet(const uint8_t *buf, size_t size, uint8_t wlan_id
     Recvd_ttl+=size;
     if (size > MAX_FORWARDER_PACKET_SIZE)
     {
-        fprintf(stderr, "Long packet (fec payload)\n");
+        fprintf(stderr, "Long packet  (fec payload)\n");
         count_p_bad += 1;
         return;
     }
