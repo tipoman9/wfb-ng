@@ -103,6 +103,7 @@ public:
 
     void log_rssi(int8_t rssi){
         if(count_all == 0){
+            count_missed=0;
             rssi_min = rssi;
             rssi_max = rssi;
         } else {
@@ -113,10 +114,22 @@ public:
         count_all += 1;
     }
 
+
     int32_t count_all;
     int32_t rssi_sum;
     int8_t rssi_min;
     int8_t rssi_max;
+
+    uint16_t count_missed;
+    uint16_t LastSeqNo=0;
+    void log_missedPacket(uint16_t SeqNo){
+        if (LastSeqNo!=0&& SeqNo!=0)                    
+            if (SeqNo!=LastSeqNo+1){            
+              count_missed++;
+              //printf("%d != %d", SeqNo, LastSeqNo);
+            }        
+        LastSeqNo=SeqNo;
+    }
 };
 
 typedef std::unordered_map<uint64_t, antennaItem> antenna_stat_t;
@@ -136,7 +149,7 @@ private:
     void deinit_fec(void);
     void send_packet(int ring_idx, int fragment_idx);
     void apply_fec(int ring_idx);
-    void log_rssi(const sockaddr_in *sockaddr, uint8_t wlan_idx, const uint8_t *ant, const int8_t *rssi);
+    void log_rssi(const sockaddr_in *sockaddr, uint8_t wlan_idx, const uint8_t *ant, const int8_t *rssi, uint16_t SeqNo);
     int get_block_ring_idx(uint64_t block_idx);
     int rx_ring_push(void);
     fec_t* fec_p;

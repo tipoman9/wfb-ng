@@ -47,6 +47,8 @@ extern "C"
 #include "wifibroadcast.hpp"
 #include "rx.hpp"
 
+#include "qopenhd.h"
+
 using namespace std;
 
 
@@ -416,11 +418,13 @@ void Aggregator::dump_stats(FILE *fp)
 
     for(antenna_stat_t::iterator it = antenna_stat.begin(); it != antenna_stat.end(); it++)
     {
-        fprintf(fp, "%" PRIu64 "\tANT\t%" PRIx64 "\t%d:%d:%d:%d\n", ts, it->first, it->second.count_all, it->second.rssi_min, it->second.rssi_sum / it->second.count_all, it->second.rssi_max);
+        fprintf(fp, "%" PRIu64 "\tANT\t%-3" PRIx64 " = %d:%d:%d:%d\n", ts, it->first, it->second.count_all, it->second.rssi_min, it->second.count_missed, it->second.rssi_max);
+        //mavlink telemetry        
+        send_stats_monitor_mode_wifi_card(sockfd, it->first, it->second.rssi_max,it->second.count_all);
     }
     antenna_stat.clear();
 
-    fprintf(fp, "%" PRIu64 "\tPKT\t%u:%u:%u:%u:%u:%u_=%u: %uKb\n", ts, count_p_all, count_p_dec_err, count_p_dec_ok, count_p_fec_recovered, count_p_lost, count_p_bad, /*this->count_p_gross_ttl ,*/ this->count_p_missed_seq_no, this->Recvd_ttl/1024);
+    fprintf(fp, "%" PRIu64 "\tPKT\t%u:%u:%u:%u:%u= %uKb\n", ts, count_p_all, count_p_dec_err, count_p_fec_recovered, count_p_lost, count_p_bad, this->Recvd_ttl/1024);
     fflush(fp);
 
     if(count_p_override)
@@ -443,10 +447,14 @@ void Aggregator::dump_stats(FILE *fp)
     this->count_p_missed_seq_no=0;
     this->count_p_gross_ttl=0;
     this->Recvd_ttl=0;
+
+    
+    
 }
 
 
-void Aggregator::log_rssi(const sockaddr_in *sockaddr, uint8_t wlan_idx, const uint8_t *ant, const int8_t *rssi)
+void Aggregator::log_rssi(const sockaddr_in *sockaddr, uint8_t wlan_idx, const uint8_t *ant, 
+    const int8_t *rssi, uint16_t SeqNo)
 {
     for(int i = 0; i < RX_ANT_MAX && ant[i] != 0xff; i++)
     {
@@ -458,8 +466,10 @@ void Aggregator::log_rssi(const sockaddr_in *sockaddr, uint8_t wlan_idx, const u
         }
 
         key |= ((uint64_t)wlan_idx << 8 | (uint64_t)ant[i]);
-
+        
         antenna_stat[key].log_rssi(rssi[i]);
+        antenna_stat[key].log_missedPacket(SeqNo);
+
     }
 }
 
@@ -587,12 +597,15 @@ void Aggregator::process_packet(const uint8_t *buf, size_t size, uint8_t wlan_id
     }
 
     count_p_dec_ok += 1;
-    log_rssi(sockaddr, wlan_idx, antenna, rssi);
+    //log_rssi(sockaddr, wlan_idx, antenna, rssi,0);
 
     assert(decrypted_len <= MAX_FEC_PAYLOAD);
 
     uint64_t block_idx = be64toh(block_hdr->data_nonce) >> 8;
     uint8_t fragment_idx = (uint8_t)(be64toh(block_hdr->data_nonce) & 0xff);
+ 
+    uint16_t SeqNo=((block_idx&0b01111111111)*fec_n) + fragment_idx;
+     log_rssi(sockaddr, wlan_idx, antenna, rssi, SeqNo);
 
     // Should never happend due to generating new session key on tx side
     if (block_idx > MAX_BLOCK_IDX)
@@ -601,6 +614,7 @@ void Aggregator::process_packet(const uint8_t *buf, size_t size, uint8_t wlan_id
         count_p_bad += 1;
         return;
     }
+     
 
     if (fragment_idx >= fec_n)
     {
@@ -912,6 +926,9 @@ int main(int argc, char* const *argv)
     rx_mode_t rx_mode = LOCAL;
     string keypair = "rx.key";
 
+
+    InjectInfo(0,0,0,0);
+
     while ((opt = getopt(argc, argv, "K:fa:c:u:p:l:i:e:")) != -1) {
         switch (opt) {
         case 'K':
@@ -929,6 +946,8 @@ int main(int argc, char* const *argv)
             break;
         case 'u':
             client_port = atoi(optarg);
+            if (client_port==14550)//Stupid, fix it tisho
+                EnableMavlinkRSSI=true;
             break;
         case 'p':
             radio_port = atoi(optarg);

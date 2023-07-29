@@ -1,0 +1,127 @@
+2023-07-16 00:31:00+0300 [-] Log opened.
+2023-07-16 00:31:00+0300 [-] --> wfb_ng.tests.test_proxy.UDPProxyTestCase.test_proxy <--
+2023-07-16 00:31:00+0300 [-] MavlinkUDPProxyProtocol starting on 14551
+2023-07-16 00:31:00+0300 [-] UDPProxyProtocol starting on 56277
+2023-07-16 00:31:00+0300 [-] SendPacket starting on 9999
+2023-07-16 00:31:00+0300 [-] Starting protocol <wfb_ng.tests.test_proxy.SendPacket object at 0x7f982285a6b0>
+2023-07-16 00:31:00+0300 [-] send 10 of b'test' to ('127.0.0.1', 14551)
+2023-07-16 00:31:00+0300 [-] Echo starting on 14553
+2023-07-16 00:31:00+0300 [-] Starting protocol <wfb_ng.tests.test_proxy.Echo object at 0x7f982285a710>
+2023-07-16 00:31:01+0300 [Echo (UDP)] got b'testtesttesttesttesttesttesttesttesttest' from ('127.0.0.1', 56277)
+2023-07-16 00:31:01+0300 [UDPProxyProtocol (UDP)] Unsupported mavlink version: 0x74
+2023-07-16 00:31:01+0300 [SendPacket (UDP)] received back b'testtesttesttesttesttesttesttesttesttest' from ('127.0.0.1', 14551)
+2023-07-16 00:31:01+0300 [-] Main loop terminated.
+2023-07-16 00:31:01+0300 [-] (UDP Port 14553 Closed)
+2023-07-16 00:31:01+0300 [-] Stopping protocol <wfb_ng.tests.test_proxy.Echo object at 0x7f982285a710>
+2023-07-16 00:31:01+0300 [-] (UDP Port 9999 Closed)
+2023-07-16 00:31:01+0300 [-] Stopping protocol <wfb_ng.tests.test_proxy.SendPacket object at 0x7f982285a6b0>
+2023-07-16 00:31:01+0300 [-] (UDP Port 14551 Closed)
+2023-07-16 00:31:01+0300 [-] (UDP Port 56277 Closed)
+2023-07-16 00:31:01+0300 [-] --> wfb_ng.tests.test_proxy.UDPProxyTestCase.test_rssi_injection <--
+2023-07-16 00:31:01+0300 [-] MavlinkUDPProxyProtocol starting on 14551
+2023-07-16 00:31:01+0300 [-] UDPProxyProtocol starting on 53810
+2023-07-16 00:31:01+0300 [-] SendPacket starting on 9999
+2023-07-16 00:31:01+0300 [-] Starting protocol <wfb_ng.tests.test_proxy.SendPacket object at 0x7f9822859cf0>
+2023-07-16 00:31:01+0300 [-] send 1 of b'test' to ('127.0.0.1', 14551)
+2023-07-16 00:31:01+0300 [SendPacket (UDP)] received back b'\xfd\t\x00\x00\x00\x03\xf2m\x00\x00\x02\x00\x03\x00\x01\x01d\x00\x04\xa8\xad' from ('127.0.0.1', 14551)
+2023-07-16 00:31:01+0300 [-] Main loop terminated.
+2023-07-16 00:31:01+0300 [-] (UDP Port 9999 Closed)
+2023-07-16 00:31:01+0300 [-] Stopping protocol <wfb_ng.tests.test_proxy.SendPacket object at 0x7f9822859cf0>
+2023-07-16 00:31:01+0300 [-] (UDP Port 14551 Closed)
+2023-07-16 00:31:01+0300 [-] (UDP Port 53810 Closed)
+2023-07-16 00:31:01+0300 [-] --> wfb_ng.tests.test_tuntap.TUNTAPTestCase.test_tuntap <--
+2023-07-16 00:31:01+0300 [-] --> wfb_ng.tests.test_txrx.TXRXTestCase.test_fec_timeout <--
+2023-07-16 00:31:01+0300 [-] # /home/home/wfb/wfb-ng/wfb_ng/tests/../../wfb_keygen
+2023-07-16 00:31:01+0300 [-] UDP_TXRX starting on 10002
+2023-07-16 00:31:01+0300 [-] Starting protocol <wfb_ng.tests.test_txrx.UDP_TXRX object at 0x7f982285bac0>
+2023-07-16 00:31:01+0300 [-] UDP_TXRX starting on 10004
+2023-07-16 00:31:01+0300 [-] Starting protocol <wfb_ng.tests.test_txrx.UDP_TXRX object at 0x7f982285b9d0>
+2023-07-16 00:31:01+0300 [-] Started debug rx
+2023-07-16 00:31:01+0300 [-] Started debug tx
+2023-07-16 00:31:01+0300 [-] debug tx: Listen on 10003 for wlan0 buf size:212992 bytes 
+2023-07-16 00:31:01+0300 [-] debug tx: Using 1 ports from 10004 for wlan emulation
+2023-07-16 00:31:01+0300 [-] debug tx: Sent:0 / 0 KB/s. Packets:1/0 free slots:0 Waiting:0 
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xffi\x80\x80\x80\x02\xa06\x823\x1a\x01\xaf\x92\x03v\xbc!\xb5\x83\xbcz)\x94\xac\xe7p\x01d\xe9\xbf\x1c\x0c\xa7\x0c\x9c\x0e7\x88Z\x05\x8d\xc2\x95eLD\x07e\xde\x19\xd5\x1a\x92\xc8\xe7\xf0\x0fo\x0f\xa9\x81x8\x94\xf7L\xa6\xe1\x9c\xa4;\xff\xef\x17\xf8\x9b\xdb\xaa\x0e\xdby\xe8\xaa\x95\x1fJ\x930`\xcd\xd2\x86' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x01\xff\xff\xff\xff\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x00\x0e\xd850\xd5\x14I\x19u\x8a\xf4\xfbO\x8f\xf3#\xa4\xfa\x8b\xbeb' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x00\xff\xff\xff)\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x013\xb5A\xd0\xfc\xc7\x83,\xab\xc0\x19\xd4\xfa\xd0d\x0e\xcc\x1a\xd3\x0c\x17' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xff\xab\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x02\xd7\xd3/l\x08\xea\xd1\x05k3/2\xaa\x05\xd4\xd2\x8c\xc3\xce!\xa1' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xff\xe3\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x03\xcb~\xf4s\xfek\xef\x99O-\x15\x84n\xc3q\x01\xc8\xe6\x9b\rS' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x00\xff\xff\xff\xc2\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x04\x03\xf1R\x02\xa8\xd7\xc9\x1b\xe1\xe2\xa6\xecp\xba\xd3\rR\xd2\x95\x9aV' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x00\xff\xff\xff\x1b\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x05\xa9c\x9fK\x0eL\x8bk@p\xb6-\xb2w8j\xfc\xfep\xf8\xdc' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xff\x8d\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x06#\x14K*\xd1%\xad\xd2\x91\xe2t.U\x8c \xb1\xaf\xb2\xf6' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x00\xff\xff\xff.\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x07\x1f\xac\x00y \xd4\x02\x8a\x14\xee\xff\x9b-\xd5)\x94\xda\xee\x13' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x01\xff\xff\xff\x9f\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x08$\x98F\xf7\r\x11\xfd_5\x04\x01\xbf\xbbtX\xfcq=\xfe/\xb9' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xfff\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\t\n\x16\xfa\x11N\xba^\xc1\x8f&\xb5\xb9u4\xa7\x9bj`-\xb2J' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xff\xb7\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\n\xd1\x80N]R\x0c\x9f\x06\xc6GyK\x04\xc0F8\xe9\xb69#u' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xff\xa3\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x0b_\xb4C\xf0\xbe*\x13\xfb<Y\xbb\xdbx\xd7rV\xd8q;o\xa0' from ('127.0.0.1', 44519)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm1' from ('127.0.0.1', 35535)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm2' from ('127.0.0.1', 35535)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm3' from ('127.0.0.1', 35535)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm4' from ('127.0.0.1', 35535)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm5' from ('127.0.0.1', 35535)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm6' from ('127.0.0.1', 35535)
+2023-07-16 00:31:01+0300 [-] Main loop terminated.
+2023-07-16 00:31:01+0300 [-] (UDP Port 10002 Closed)
+2023-07-16 00:31:01+0300 [-] Stopping protocol <wfb_ng.tests.test_txrx.UDP_TXRX object at 0x7f982285bac0>
+2023-07-16 00:31:01+0300 [-] (UDP Port 10004 Closed)
+2023-07-16 00:31:01+0300 [-] Stopping protocol <wfb_ng.tests.test_txrx.UDP_TXRX object at 0x7f982285b9d0>
+2023-07-16 00:31:01+0300 [-] Stopped RX debug rx with code None
+2023-07-16 00:31:01+0300 [-] Stopped TX debug tx with code None
+2023-07-16 00:31:01+0300 [-] --> wfb_ng.tests.test_txrx.TXRXTestCase.test_txrx <--
+2023-07-16 00:31:01+0300 [-] # /home/home/wfb/wfb-ng/wfb_ng/tests/../../wfb_keygen
+2023-07-16 00:31:01+0300 [-] UDP_TXRX starting on 10002
+2023-07-16 00:31:01+0300 [-] Starting protocol <wfb_ng.tests.test_txrx.UDP_TXRX object at 0x7f98228b47f0>
+2023-07-16 00:31:01+0300 [-] UDP_TXRX starting on 10004
+2023-07-16 00:31:01+0300 [-] Starting protocol <wfb_ng.tests.test_txrx.UDP_TXRX object at 0x7f98228b4760>
+2023-07-16 00:31:01+0300 [-] Started debug rx
+2023-07-16 00:31:01+0300 [-] Started debug tx
+2023-07-16 00:31:01+0300 [-] debug tx: Listen on 10003 for wlan0 buf size:212992 bytes 
+2023-07-16 00:31:01+0300 [-] debug tx: Using 1 ports from 10004 for wlan emulation
+2023-07-16 00:31:01+0300 [-] debug tx: Sent:0 / 0 KB/s. Packets:1/0 free slots:0 Waiting:2 
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xffi\x80\x80\x80\x02\xdf\x16F\x8c\xb4\x9d,t\xbc\x9c\xcds\xb3\x11w\x10y\nXF\x8c\xd8;\x06S6\xd9\xf1\x84a#\x87\xab\xcb\x16\x1f\x10q9\xdb\xa2\xd2\xdc\x13\xa9\xf5\xba\x9cH\xc8\xb85\x14\x12\x1e\n\x0f\xc0U\xd93\xf3a\x9e"\x88?3\xeb ;\xb5\xa2\x91\xfbDn\xe7\xa9\x01\xe5\x8d\xf9NK\x85\xf1' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b"\x01\x01\xff\xff\xff\xff\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x00\xca\x1c\x87\xf5>\xfc\x12(N%Sg\xad\xa7:.\x98d\x06'C" from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x00\xff\xff\xff)\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x01P96i\x86\xfa#\xa0xG\xf9mv\x92\x04\xd8\x1dc5\x88"' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xff\xab\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x02G\xd5\xf1|v\x0c\x9c\xc1\xad8g\x12\x1f\x94\xbdS<K\x10z=' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xff\xe3\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x03j\xa4\xf1q\xef\xb1\x9a\xe8?\xdb:\xb2\xd5+0\xd5\x851\x8f\xd9&' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x00\xff\xff\xff\xc2\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x04\xb0]\xcel\x93\xe7\xa8Gu\xd1\x94\xd8\x83\x94\xef\x7f\xd0\xb3]gp' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x00\xff\xff\xff\x1b\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x05\xc6\xc6C1\xc1\x93m\xa33\x05 }\x802\x9e\xbc\xad\x1cD\x8dg' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b"\x00\x01\xff\xff\xff\x8d\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x06&\xc6\x8f\xd3\xb4W,\xcd\t\x1d'\x83?\x89\x8cYM\xb2?\x9f\x07" from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x00\xff\xff\xff.\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x07\x03\x86\xb7\x05\x89>\x01\xcf\x99\xf4\x14\xe7E\xd3\xfb\x11\xac:\xd7\xbc\xb1' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x01\xff\xff\xff\x9f\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x08\xdd\xf2\xbf0\xd3\xcbu\x0c;\x88\xfd_\x86\xe4D;\x85uU>\x13' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xfff\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\t)\xdbY\x8d\x04\xe8\x1f0\xb4Dm\xc9\xa7C\xbe\xa5\xee\xa6:\xeed' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xff\xb7\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\n\xcc\xd5\x06\x95L1\x1b\x00\xad\x1e.\x0e\xab\xa1t\xc9\xa6E\x02\x8e\xf9' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xff\xa3\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x00\x0b\x00oJp\x1a\xd8g\xdf\xba%l B\x8b\xcf\x9b\xe2\x8eM\xa8\x17' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xff]\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x001\x17\x94\xd88\xb7\xc5\x8e\xec\x18/H&g\xe19\x11\xf8\xa4\xa0!' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x01\xff\xff\xffX\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x01.\x13FW\x0c"\x99\x1f\x93?\xb8\x98\xda#\x14\xae\x0b\x1fJ\x87\xc4\xcd' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xff\xd4\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x02\xb7\x98\xb7$\xf1\x00\xe1\xc7\xa0\x825\x9e\xf1C\x98(\x84]\xbe-\x9bX' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xff\xcd\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x03!\xe0\x08\x84\xe2w\x8e]\xe7\x91\xb3\x87\x13\n.\xa6+\xdf\x12pa\x94' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xff\xb4\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x04V~\xda\xc0MT\xfc[\x89\xde7,\xa9\xb1Y\xb1am\x17QE\t' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xff\x0e\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x05\x9bX&;\x12\x1f\xe0\xa5\xb9\xff\xb5\xc7\x80\xf2\xb1\xec4\xee\xcbh-\x01' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x00\xff\xff\xffA\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x06_\xf5\xc2\x86\xe2\xf7\x1a\xd5\x89\xb4|\x13\xd2ed\xa3a g\xc3Vb' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x01\xff\xff\xff\xdc\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x07\x88R<~H\xfc_\x89 <\x83*\xff\x7fc\xe9\xee\x88\t9h|' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xff\xe9\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x08\xc5I\xd630@\xd6\xe0\x1b\xc1\xf0h\x0e&\xa5\xd9\xf9\x12\xfe3\xd1\x9f' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xffA\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\t\x16\x7fR\x8d8a\x11\xa4\xf8_cb\xa6\x0e\x18\xb8\xe3\xc1\x05\x90e\xa9' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x01\x00\xff\xff\xffg\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\nwn\xc8\x00\x03\xc7\xf1:\xa7\xf3\xc8l\x91\xa5\x7f\x1dm\xe3\xf2\xcb\xf8\xc9' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'\x00\x01\xff\xff\xff~\x80\x80\x80\x01\x00\x00\x00\x00\x00\x00\x01\x0b\xe81\xbb\x95\x1d\xbcl\xc4{[\xc9a(67\xc0K\xc5\xd1\xce\x9ep' from ('127.0.0.1', 56887)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm1' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm2' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm3' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm5' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm6' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm7' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm8' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm9' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm10' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm11' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm12' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm13' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm14' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm15' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [UDP_TXRX (UDP)] got b'm16' from ('127.0.0.1', 48211)
+2023-07-16 00:31:01+0300 [-] Main loop terminated.
+2023-07-16 00:31:01+0300 [-] (UDP Port 10002 Closed)
+2023-07-16 00:31:01+0300 [-] Stopping protocol <wfb_ng.tests.test_txrx.UDP_TXRX object at 0x7f98228b47f0>
+2023-07-16 00:31:01+0300 [-] (UDP Port 10004 Closed)
+2023-07-16 00:31:01+0300 [-] Stopping protocol <wfb_ng.tests.test_txrx.UDP_TXRX object at 0x7f98228b4760>
+2023-07-16 00:31:01+0300 [-] Stopped RX debug rx with code None
+2023-07-16 00:31:01+0300 [-] Stopped TX debug tx with code None
