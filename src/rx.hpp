@@ -120,12 +120,14 @@ public:
     int8_t rssi_min;
     int8_t rssi_max;
 
-    uint16_t count_missed;
-    uint16_t LastSeqNo=0;
-    void log_missedPacket(uint16_t SeqNo){
+    uint32_t count_missed;
+    uint32_t LastSeqNo=0;
+    void log_missedPacket(uint32_t SeqNo){
         if (LastSeqNo!=0&& SeqNo!=0)                    
             if (SeqNo!=LastSeqNo+1){            
-              count_missed++;
+              int32_t diff=SeqNo - LastSeqNo;
+              if (diff>1) //we'll miss when counter overflows
+                count_missed+= (diff - 1) ;
               //printf("%d != %d", SeqNo, LastSeqNo);
             }        
         LastSeqNo=SeqNo;
@@ -149,7 +151,7 @@ private:
     void deinit_fec(void);
     void send_packet(int ring_idx, int fragment_idx);
     void apply_fec(int ring_idx);
-    void log_rssi(const sockaddr_in *sockaddr, uint8_t wlan_idx, const uint8_t *ant, const int8_t *rssi, uint16_t SeqNo);
+    void log_rssi(const sockaddr_in *sockaddr, uint8_t wlan_idx, const uint8_t *ant, const int8_t *rssi, uint32_t SeqNo);
     int get_block_ring_idx(uint64_t block_idx);
     int rx_ring_push(void);
     fec_t* fec_p;

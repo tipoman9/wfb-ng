@@ -411,20 +411,48 @@ int Aggregator::get_block_ring_idx(uint64_t block_idx)
     return ring_idx;
 }
 
+std::unordered_map<uint64_t, int> antennas;
+
+
 void Aggregator::dump_stats(FILE *fp)
 {
     //timestamp in ms
     uint64_t ts = get_time_ms();
-
+    
+    send_heartbeat(sockfd);
+    int antenna_index=0; 
     for(antenna_stat_t::iterator it = antenna_stat.begin(); it != antenna_stat.end(); it++)
     {
+        //antenna_index++;
         fprintf(fp, "%" PRIu64 "\tANT\t%-3" PRIx64 " = %d:%d:%d:%d\n", ts, it->first, it->second.count_all, it->second.rssi_min, it->second.count_missed, it->second.rssi_max);
+        antennas.insert(std::make_pair(it->first, antennas.size()+1));
+        antenna_index = std::abs(antennas[it->first]);
+        antennas[it->first]= - std::abs(antennas[it->first]);//Negative, means it is present
         //mavlink telemetry        
-        send_stats_monitor_mode_wifi_card(sockfd, it->first, it->second.rssi_max,it->second.count_all);
+        //send_stats_monitor_mode_wifi_card(sockfd, it->first, it->second.rssi_max,it->second.count_all);
+        send_stats_monitor_mode_wifi_card(sockfd, antenna_index-1, it->second.rssi_max,it->second.count_missed);        
     }
+
+   // Iterating through the map
+    for (const auto& pair : antennas) {
+        if (pair.second>0){//This antenna is not reported any more, need to show some info
+            send_stats_monitor_mode_wifi_card(sockfd, pair.second-1/*antenaindex*/, 99 , 999); 
+            fprintf(fp, "%" PRIu64 "\tANT\t%-3" PRIx64 " ...\n", ts, pair.first);
+        }
+         antennas[pair.first]=  std::abs(antennas[pair.first]);//Positive, no info still dispalyed.
+    }
+
+
     antenna_stat.clear();
 
-    fprintf(fp, "%" PRIu64 "\tPKT\t%u:%u:%u:%u:%u= %uKb\n", ts, count_p_all, count_p_dec_err, count_p_fec_recovered, count_p_lost, count_p_bad, this->Recvd_ttl/1024);
+    send_stat_video_ground(sockfd,this->Recvd_ttl*8// only whis will be shown as bitrate
+    ,count_p_lost,count_p_fec_recovered,count_p_fec_recovered);
+
+    send_stats_monitor_mode_wifi_link(sockfd,count_p_lost //this will show as lost percentage
+    ,count_p_all,this->Recvd_ttl,count_p_lost);
+
+    fprintf(fp, "%" PRIu64 "\tPKT\t%u:R%u:L%u:B%u= %uKb\n", ts, 
+    count_p_all, count_p_fec_recovered, count_p_lost, count_p_bad, this->Recvd_ttl/1024);
     fflush(fp);
 
     if(count_p_override)
@@ -454,7 +482,7 @@ void Aggregator::dump_stats(FILE *fp)
 
 
 void Aggregator::log_rssi(const sockaddr_in *sockaddr, uint8_t wlan_idx, const uint8_t *ant, 
-    const int8_t *rssi, uint16_t SeqNo)
+    const int8_t *rssi, uint32_t SeqNo)
 {
     for(int i = 0; i < RX_ANT_MAX && ant[i] != 0xff; i++)
     {
@@ -604,7 +632,7 @@ void Aggregator::process_packet(const uint8_t *buf, size_t size, uint8_t wlan_id
     uint64_t block_idx = be64toh(block_hdr->data_nonce) >> 8;
     uint8_t fragment_idx = (uint8_t)(be64toh(block_hdr->data_nonce) & 0xff);
  
-    uint16_t SeqNo=((block_idx&0b01111111111)*fec_n) + fragment_idx;
+    uint32_t SeqNo=((block_idx&0xFFFFFFF)*fec_n) + fragment_idx;//Fec_N must be less than 16 !!!
      log_rssi(sockaddr, wlan_idx, antenna, rssi, SeqNo);
 
     // Should never happend due to generating new session key on tx side
@@ -927,9 +955,7 @@ int main(int argc, char* const *argv)
     string keypair = "rx.key";
 
 
-    InjectInfo(0,0,0,0);
-
-    while ((opt = getopt(argc, argv, "K:fa:c:u:p:l:i:e:")) != -1) {
+    while ((opt = getopt(argc, argv, "K:fa:c:u:p:l:i:e:q:")) != -1) {
         switch (opt) {
         case 'K':
             keypair = optarg;
@@ -946,8 +972,7 @@ int main(int argc, char* const *argv)
             break;
         case 'u':
             client_port = atoi(optarg);
-            if (client_port==14550)//Stupid, fix it tisho
-                EnableMavlinkRSSI=true;
+           
             break;
         case 'p':
             radio_port = atoi(optarg);
@@ -961,11 +986,17 @@ int main(int argc, char* const *argv)
         case 'e':
             epoch = atoll(optarg);
             break;
+
+        case 'q':
+            MavlinkPort = atoi(optarg);
+            EnableMavlinkRSSI=true;
+            break;
+
         default: /* '?' */
         show_usage:
             fprintf(stderr, "T_E_S_T Local receiver: %s [-K rx_key] [-c client_addr] [-u client_port] [-p radio_port] [-l log_interval] [-e epoch] [-i link_id] interface1 [interface2] ...\n", argv[0]);
             fprintf(stderr, "Remote (forwarder): %s -f [-c client_addr] [-u client_port] [-p radio_port] [-i link_id] interface1 [interface2] ...\n", argv[0]);
-            fprintf(stderr, "Remote (aggregator): %s -a server_port [-K rx_key] [-c client_addr] [-u client_port] [-l log_interval] [-p radio_port] [-e epoch] [-i link_id]\n", argv[0]);
+            fprintf(stderr, "Remote (aggregator): %s -a server_port [-K rx_key] [-c client_addr] [-u client_port] [-l log_interval] [-p radio_port] [-e epoch] [-i link_id] [-q MavlinkPort]\n", argv[0]);
             fprintf(stderr, "Default: K='%s', connect=%s:%d, link_id=0x%06x, radio_port=%u, epoch=%" PRIu64 ", log_interval=%d\n", keypair.c_str(), client_addr.c_str(), client_port, link_id, radio_port, epoch, log_interval);
             fprintf(stderr, "WFB-ng version  ");
             fprintf(stderr, "WFB-ng home page: <http://wfb-ng.org>\n");
@@ -975,7 +1006,7 @@ int main(int argc, char* const *argv)
 
     {
         int fd;
-        int c;
+        int c;        
 
         if ((fd = open("/dev/random", O_RDONLY)) != -1) {
             if (ioctl(fd, RNDGETENTCNT, &c) == 0 && c < 160) {
@@ -1006,6 +1037,20 @@ int main(int argc, char* const *argv)
                 agg = shared_ptr<Aggregator>(new Aggregator(client_addr, client_port, keypair, epoch, channel_id));
             }else{
                 agg = shared_ptr<Forwarder>(new Forwarder(client_addr, client_port));
+            }
+
+            if (EnableMavlinkRSSI && (MavlinkPort !=client_port)){//If this is mavlink channel, reuse the socket and inject RSSI 
+                InjectInfo(0,0,0,0);
+                //We'll create s neq socket only to send telemetry to QOpenHD
+                //InitMavlinkSocket(MavlinkPort);
+                 // Example std::string
+                std::string address = "127.0.0.1";                
+                // Convert the std::string to a C-style null-terminated string using c_str()                        
+                int fd = open_udp_socket_for_tx(address, MavlinkPort );
+                socket_mav=fd;
+                printf("Mavlink socket created : %s:%d/r/n", address.c_str(), MavlinkPort);
+
+
             }
 
             radio_loop(argc, argv, optind, channel_id, agg, log_interval);
