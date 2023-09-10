@@ -430,13 +430,13 @@ void Aggregator::dump_stats(FILE *fp)
         antennas[it->first]= - std::abs(antennas[it->first]);//Negative, means it is present
         //mavlink telemetry        
         //send_stats_monitor_mode_wifi_card(sockfd, it->first, it->second.rssi_max,it->second.count_all);
-        send_stats_monitor_mode_wifi_card(sockfd, antenna_index-1, it->second.rssi_max,it->second.count_missed);        
+        send_stats_monitor_mode_wifi_card(sockfd, antenna_index-1, it->second.rssi_max, it->second.count_all, it->second.count_missed);        
     }
 
    // Iterating through the map
     for (const auto& pair : antennas) {
         if (pair.second>0){//This antenna is not reported any more, need to show some info
-            send_stats_monitor_mode_wifi_card(sockfd, pair.second-1/*antenaindex*/, 99 , 999); 
+            send_stats_monitor_mode_wifi_card(sockfd, pair.second-1/*antenaindex*/, 99 , 0, 999); 
             fprintf(fp, "%" PRIu64 "\tANT\t%-3" PRIx64 " ...\n", ts, pair.first);
         }
          antennas[pair.first]=  std::abs(antennas[pair.first]);//Positive, no info still dispalyed.

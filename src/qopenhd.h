@@ -1,6 +1,6 @@
 #include "mavlink/common/mavlink.h"
-#include "mavlink_stat_monitor_mode_wifi_card.h"
-#include "mavlink_stat_video_ground.h"
+#include "mavlink_msg_openhd_stats_monitor_mode_wifi_card.h"
+#include "mavlink_msg_openhd_stats_wb_video_ground.h"
 #include "mavlink_msg_openhd_stats_monitor_mode_wifi_link.h"
 
 
@@ -36,39 +36,39 @@ int open_udp_socket_for_tx(const std::string &client_addr, int client_port)
 
 
 int ret;
-void send_stats_monitor_mode_wifi_card(int socket_fd, int card_index, int rssi, int pckt_ttl)
+void send_stats_monitor_mode_wifi_card(int socket_fd, int card_index, int rssi, int pckt_ttl, int pckt_missed)
 {
     if (!EnableMavlinkRSSI)
         return;
-
     if (socket_mav!=0)
         socket_fd=socket_mav;
 
      mavlink_message_t message;
  
+     int8_t signal_quality=   (pckt_ttl ==0) ? 0 : 100*((pckt_ttl - pckt_missed)/(pckt_ttl));
+    
+    if (pckt_missed>255)
+        pckt_missed=255;
+
       mavlink_msg_openhd_stats_monitor_mode_wifi_card_pack_chan(
         100,
         MAV_COMP_ID_SYSTEM_CONTROL,
         MAVLINK_COMM_1,
         &message,
-        card_index,rssi*-1,pckt_ttl,909,0,0);
+        card_index,0,rssi*-1,rssi,signal_quality, 0, pckt_ttl,0,pckt_missed,0,rssi,
+        0,0);
         
-
     uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
     const int len = mavlink_msg_to_send_buffer(buffer, &message);
 
-    
-    //if (socket)
      ret = send(socket_fd,buffer, len,MSG_DONTWAIT);
 
     if (ret != len) {
-        printf("sendto error: %s\n", strerror(errno));
+       // printf("sendto error: %s\n", strerror(errno));
     } else {
-        //printf("Sent %d:%d-%d \n",card_index,rssi,pckt_ttl);
+        printf("Sent %d:%d-%d \n",card_index,rssi,pckt_ttl);
     } 
-
 }
-
 
 void send_stat_video_ground(int socket_fd, int32_t bitrate, int32_t count_blocks_lost, 
 int32_t count_blocks_recovered, int32_t count_fragments_recovered ){
@@ -86,7 +86,7 @@ int32_t count_blocks_recovered, int32_t count_fragments_recovered ){
         bitrate,//MBit/s in separate control
         500,
         count_blocks_lost,count_blocks_recovered,count_fragments_recovered,//Shown in extra info window for link quality
-        0,0,0,0,0);
+        0,0,0);
     
 
     uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
@@ -95,8 +95,8 @@ int32_t count_blocks_recovered, int32_t count_fragments_recovered ){
     int    ret=send(socket_fd,buffer, len,MSG_DONTWAIT);
     if (ret != len) {
         //printf("sendto error: %s\n", strerror(errno));
-    } else {
-        //printf("Sent attitude\n");
+    } else {       
+       // printf("Lost: %d  Recovered:%d  / %d \n",count_blocks_lost ,count_blocks_recovered ,count_fragments_recovered);
     } 
 }
 
@@ -116,6 +116,8 @@ static constexpr auto OHD_SYS_ID_AIR = 101;
    // Other than ping, we seperate by sys ID's - there are up to 3 Systems - The OpenHD air unit, the OpenHD ground unit and the FC connected to the OHD air unit.
     // The systems then (optionally) can seperate by components, but r.n this is not needed.
 */
+     if (loss_percent>127)
+        loss_percent=127;
 
       mavlink_msg_openhd_stats_monitor_mode_wifi_link_pack_chan(
         100,
@@ -123,7 +125,8 @@ static constexpr auto OHD_SYS_ID_AIR = 101;
         MAVLINK_COMM_1,
         &message,0,rx_pps,0,rx_bps,
         loss_percent, //Loss percentage
-        0,dropped,0,0,0,0);
+        0,dropped,0,0,0,0,0,0,0,0,0,0,0,0);
+        
         
 
     uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
