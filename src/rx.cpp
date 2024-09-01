@@ -449,7 +449,7 @@ void Aggregator::dump_stats(FILE *fp)
     ,count_p_lost,count_p_fec_recovered,count_p_fec_recovered);
 
     send_stats_monitor_mode_wifi_link(sockfd,count_p_lost //this will show as lost percentage
-    ,count_p_all,this->Recvd_ttl,count_p_lost);
+    ,count_p_all,this->Recvd_agg,count_p_lost);
 
     fprintf(fp, "%" PRIu64 "\tPKT\t%u:R%u:L%u:B%u= %uKb\n", ts, 
     count_p_all, count_p_fec_recovered, count_p_lost, count_p_bad, this->Recvd_ttl/1024);
@@ -475,9 +475,8 @@ void Aggregator::dump_stats(FILE *fp)
     this->count_p_missed_seq_no=0;
     this->count_p_gross_ttl=0;
     this->Recvd_ttl=0;
+    this->Recvd_agg=0;
 
-    
-    
 }
 
 
@@ -767,7 +766,7 @@ void Aggregator::send_packet(int ring_idx, int fragment_idx)
         count_p_bad += 1;
     }else if(!(flags & WFB_PACKET_FEC_ONLY))
     {
-        //Recvd_ttl+=packet_size;
+        Recvd_agg+=packet_size;
         send(sockfd, payload, packet_size, MSG_DONTWAIT);
     }
 }

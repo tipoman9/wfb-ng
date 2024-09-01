@@ -56,7 +56,7 @@ void send_stats_monitor_mode_wifi_card(int socket_fd, int card_index, int rssi, 
         MAVLINK_COMM_1,
         &message,
         card_index,0,rssi*-1,rssi,signal_quality, 0, pckt_ttl,0,pckt_missed,0,rssi,
-        0,0);
+        1,2);
         
     uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
     const int len = mavlink_msg_to_send_buffer(buffer, &message);
@@ -86,7 +86,7 @@ int32_t count_blocks_recovered, int32_t count_fragments_recovered ){
         bitrate,//MBit/s in separate control
         500,
         count_blocks_lost,count_blocks_recovered,count_fragments_recovered,//Shown in extra info window for link quality
-        0,0,0);
+        1,0,0);
     
 
     uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
@@ -125,7 +125,7 @@ static constexpr auto OHD_SYS_ID_AIR = 101;
         MAVLINK_COMM_1,
         &message,0,rx_pps,0,rx_bps,
         loss_percent, //Loss percentage
-        0,dropped,0,0,0,0,0,0,0,0,0,0,0,0);
+        0,dropped,0,0,0,0,0,0,0,0,0,3,4,5);
         
         
 

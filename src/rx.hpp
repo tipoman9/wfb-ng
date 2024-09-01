@@ -41,6 +41,7 @@ class BaseAggregator
 public:
     uint32_t count_p_gross_ttl;
     uint32_t Recvd_ttl;
+    uint32_t Recvd_agg;
     uint16_t count_p_last_seq_no;
     uint16_t count_p_missed_seq_no;
 
