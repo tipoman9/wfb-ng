@@ -1049,7 +1049,9 @@ int main(int argc, char* const *argv)
                 socket_mav=fd;
                 printf("Mavlink socket created : %s:%d/r/n", address.c_str(), MavlinkPort);
 
-
+                fd = open_udp_socket_for_tx(address, MavlinkPort+1 );
+                socket_mav2=fd;
+                printf("Mavlink second socket created : %s:%d/r/n", address.c_str(), MavlinkPort+1);
             }
 
             radio_loop(argc, argv, optind, channel_id, agg, log_interval);

@@ -12,6 +12,7 @@ void InjectInfo(int card_index, int rssi, int packets_ttl, int packets_lost){
 int channel=0;
 
 int socket_mav=0;
+int socket_mav2=0;
 
 bool EnableMavlinkRSSI=false;
 int MavlinkPort=0;
@@ -61,7 +62,10 @@ void send_stats_monitor_mode_wifi_card(int socket_fd, int card_index, int rssi, 
     uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
     const int len = mavlink_msg_to_send_buffer(buffer, &message);
 
-     ret = send(socket_fd,buffer, len,MSG_DONTWAIT);
+    ret = send(socket_fd,buffer, len,MSG_DONTWAIT);
+
+    if (socket_mav2!=0)
+        send(socket_mav2,buffer, len,MSG_DONTWAIT);
 
     if (ret != len) {
        // printf("sendto error: %s\n", strerror(errno));
@@ -93,6 +97,9 @@ int32_t count_blocks_recovered, int32_t count_fragments_recovered ){
     const int len = mavlink_msg_to_send_buffer(buffer, &message);
     
     int    ret=send(socket_fd,buffer, len,MSG_DONTWAIT);
+    if (socket_mav2!=0)
+        send(socket_mav2,buffer, len,MSG_DONTWAIT);
+
     if (ret != len) {
         //printf("sendto error: %s\n", strerror(errno));
     } else {       
@@ -132,6 +139,8 @@ static constexpr auto OHD_SYS_ID_AIR = 101;
     uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
     const int len = mavlink_msg_to_send_buffer(buffer, &message);
     int    ret=send(socket_fd,buffer, len,MSG_DONTWAIT);
+    if (socket_mav2!=0)
+        ret = send(socket_mav2,buffer, len,MSG_DONTWAIT);
     
     if (ret != len) {
         //printf("sendto error: %s\n", strerror(errno));
@@ -173,6 +182,8 @@ void send_heartbeat(int socket_fd)
     const int len = mavlink_msg_to_send_buffer(buffer, &message);
 
     int    ret=send(socket_fd,buffer, len,MSG_DONTWAIT);
+    if (socket_mav2!=0)
+        send(socket_mav2,buffer, len,MSG_DONTWAIT);
     if (ret != len) {
         //printf("sendto error: %s\n", strerror(errno));
     } else {
