@@ -668,6 +668,103 @@ uint32_t extract_rxq_overflow(struct msghdr *msg)
     return 0;
 }
 
+
+#define PACKET_BATCH 20  // Check timing every xx packets
+
+static uint64_t last_batch_ns = 0;
+static size_t accumulated_bytes = 0;
+static int packet_count = 0;
+
+// Global MCS index (set this before sending packets)
+static int mcs_index = 0;
+static double FEC_coef=1.25;// 1.25;
+static int CBR_delay_us = 0;
+static int CBR_delay_times=0;
+
+static int debug_counter = 0;
+
+
+// Convert MCS index to kbps
+static double get_max_kbps(int mcs) {
+    switch (mcs) {
+        case 0: return 5000.0;
+        case 1: return 10000.0;
+        case 2: return 15000.0;
+        case 3: return 20000.0;
+        case 4: return 30000.0;
+        default: return 5000.0;  // fallback for unknown MCS
+    }
+}
+
+static uint64_t now_ns() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ((uint64_t)ts.tv_sec * 1000000000ULL) + ts.tv_nsec;
+}
+
+void maybe_wait_batch(size_t packet_len) {
+    accumulated_bytes += packet_len;
+    packet_count++;
+    debug_counter++;
+
+    if (packet_count < PACKET_BATCH) return;
+
+    uint64_t now = now_ns();
+
+    if (last_batch_ns == 0) {
+        last_batch_ns = now;
+        accumulated_bytes = 0;
+        packet_count = 0;
+        return;
+    }
+
+    double max_kbps = get_max_kbps(mcs_index)   / FEC_coef;
+    double elapsed_sec = (now - last_batch_ns) / 1e9;
+    //double expected_sec = accumulated_bytes / (max_kbps * 1024.0);
+    double expected_sec = (accumulated_bytes * 8.0) / (max_kbps * 1000.0);//Bits Per Second
+
+    //printf("max_kbps: elapsed_sec: expected_sec:  \n")
+   // printf("DEBUG: max_kbps=%.2f, elapsed_sec=%.6f, expected_sec=%.6f\n", max_kbps, elapsed_sec, expected_sec);
+
+    if (debug_counter >= 1000) {
+       // printf("DBG (1000th packet): accumulated_bytes=%u, max_kbps=%.2f, elapsed_sec=%.6f, expected_sec=%.6f\n",
+       //        accumulated_bytes, max_kbps, elapsed_sec, expected_sec);
+        debug_counter = 0;
+    }
+
+    if (elapsed_sec < expected_sec) {
+        double sleep_sec = expected_sec - elapsed_sec;
+        uint64_t sleep_ns = (uint64_t)(sleep_sec * 1e9);
+
+        struct timespec ts = {
+            .tv_sec = sleep_ns / 1000000000ULL,
+            .tv_nsec = sleep_ns % 1000000000ULL
+        };
+        struct timespec rem;
+
+        if (CBR_delay_us==0){        
+            printf("CBR FIX: accumulated_bytes=%u, max_kbps=%.2f, elapsed_sec=%.6f, expected_sec=%.6f, times_sec=%u\n",
+                   accumulated_bytes, max_kbps, elapsed_sec, expected_sec,CBR_delay_times);
+            CBR_delay_times=0;
+        }
+
+        CBR_delay_us += (sleep_ns/1000);
+        CBR_delay_times++;
+
+        // Handle spurious wakeups
+        while (nanosleep(&ts, &rem) == -1 && errno == EINTR) {
+            ts = rem;
+        }
+
+        now = now_ns();  // update after sleeping
+    }
+
+    // Reset for next batch
+    last_batch_ns = now;
+    accumulated_bytes = 0;
+    packet_count = 0;
+}
+
 void data_source(unique_ptr<Transmitter> &t, vector<int> &rx_fd, int control_fd, int fec_timeout, bool mirror, int log_interval)
 {
     int nfds = rx_fd.size();
@@ -696,6 +793,7 @@ void data_source(unique_ptr<Transmitter> &t, vector<int> &rx_fd, int control_fd,
     uint32_t count_b_injected = 0;  // successfully injected bytes (include additional fec packets)
     uint32_t count_p_dropped = 0;   // dropped due to rxq overflows or injection timeout
     uint32_t count_p_truncated = 0; // injected large packets that were truncated
+
     int start_fd_idx = 0;
 
     for(;;)
@@ -722,8 +820,8 @@ void data_source(unique_ptr<Transmitter> &t, vector<int> &rx_fd, int control_fd,
         {
             t->dump_stats(cur_ts, count_p_injected, count_p_dropped, count_b_injected);
 
-            IPC_MSG("%" PRIu64 "\tPKT\t%u:%u:%u:%u:%u:%u:%u\n",
-                    cur_ts, count_p_fec_timeouts, count_p_incoming, count_b_incoming, count_p_injected, count_b_injected, count_p_dropped, count_p_truncated);
+            IPC_MSG("%" PRIu64 "\tPKT\t%u:%u:%u:%u:%u:%u:%u=>%u\n",
+                    cur_ts, count_p_fec_timeouts, count_p_incoming, count_b_incoming, count_p_injected, count_b_injected, count_p_dropped, count_p_truncated, (CBR_delay_us/1000));
             IPC_MSG_SEND();
 
             if(count_p_dropped)
@@ -743,6 +841,7 @@ void data_source(unique_ptr<Transmitter> &t, vector<int> &rx_fd, int control_fd,
             count_b_injected = 0;
             count_p_dropped = 0;
             count_p_truncated = 0;
+            CBR_delay_us=0;
 
             log_send_ts = cur_ts + log_interval - ((cur_ts - log_send_ts) % log_interval);
         }
@@ -997,6 +1096,12 @@ void data_source(unique_ptr<Transmitter> &t, vector<int> &rx_fd, int control_fd,
                         // we yield session packets only if there are data packets
                         session_key_announce_ts = cur_ts + SESSION_KEY_ANNOUNCE_MSEC;
                     }
+
+//Here we try to apply CBR logic, not the best place, better to be inside transmitter::send_packet+
+                    
+                    mcs_index = t->get_radiotap_header().mcs_index;
+                    maybe_wait_batch(rsize);
+                                        
 
                     t->send_packet(buf, rsize, 0);
 

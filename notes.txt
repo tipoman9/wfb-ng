@@ -1,0 +1,7 @@
+#cross compile 
+/usr/bin/make -j9 CC=/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast/host/bin/arm-openipc-linux-gnueabihf-gcc CXX=/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast/host/bin/arm-openipc-linux-gnueabihf-g++ LDFLAGS=-s -C /home/home/src/wfb-ng/latest/wfb-ng wfb_tx
+
+/usr/bin/make -j9 CC=/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-gnueabihf-gcc CXX=/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-gnueabihf-g++ LDFLAGS=-s -C /home/home/src/wfb-ng/latest/wfb-ng wfb_tx
+
+
+scp -O ./wfb_tx root@192.168.1.88:/usr/bin/
