@@ -669,7 +669,7 @@ uint32_t extract_rxq_overflow(struct msghdr *msg)
 }
 
 
-#define PACKET_BATCH 20  // Check timing every xx packets
+#define PACKET_BATCH 40  // Check timing every xx packets
 
 static uint64_t last_batch_ns = 0;
 static size_t accumulated_bytes = 0;
@@ -680,11 +680,13 @@ static int mcs_index = 0;
 static double FEC_coef=1.25;// 1.25;
 static int CBR_delay_us = 0;
 static int CBR_delay_times=0;
+static uint64_t overslept_us=0;
+ 
 
 static int debug_counter = 0;
 
 
-// Convert MCS index to kbps
+// This is the max bitrate Tx rate for a given MCS in KiloBits/S
 static double get_max_kbps(int mcs) {
     switch (mcs) {
         case 0: return 5000.0;
@@ -719,12 +721,9 @@ void maybe_wait_batch(size_t packet_len) {
     }
 
     double max_kbps = get_max_kbps(mcs_index)   / FEC_coef;
-    double elapsed_sec = (now - last_batch_ns) / 1e9;
-    //double expected_sec = accumulated_bytes / (max_kbps * 1024.0);
+    double elapsed_sec = (now - last_batch_ns) / 1e9;    
     double expected_sec = (accumulated_bytes * 8.0) / (max_kbps * 1000.0);//Bits Per Second
 
-    //printf("max_kbps: elapsed_sec: expected_sec:  \n")
-   // printf("DEBUG: max_kbps=%.2f, elapsed_sec=%.6f, expected_sec=%.6f\n", max_kbps, elapsed_sec, expected_sec);
 
     if (debug_counter >= 1000) {
        // printf("DBG (1000th packet): accumulated_bytes=%u, max_kbps=%.2f, elapsed_sec=%.6f, expected_sec=%.6f\n",
@@ -736,27 +735,35 @@ void maybe_wait_batch(size_t packet_len) {
         double sleep_sec = expected_sec - elapsed_sec;
         uint64_t sleep_ns = (uint64_t)(sleep_sec * 1e9);
 
-        struct timespec ts = {
-            .tv_sec = sleep_ns / 1000000000ULL,
-            .tv_nsec = sleep_ns % 1000000000ULL
-        };
-        struct timespec rem;
+        if (sleep_ns > 5000000ULL) {  // Only sleep if > 5 ms
 
-        if (CBR_delay_us==0){        
-            printf("CBR FIX: accumulated_bytes=%u, max_kbps=%.2f, elapsed_sec=%.6f, expected_sec=%.6f, times_sec=%u\n",
-                   accumulated_bytes, max_kbps, elapsed_sec, expected_sec,CBR_delay_times);
-            CBR_delay_times=0;
+            struct timespec ts = {
+                .tv_sec = sleep_ns / 1000000000ULL,
+                .tv_nsec = sleep_ns % 1000000000ULL
+            };
+            struct timespec rem;
+
+            if (CBR_delay_us==0){                        
+                printf("CBR FIX: accumulated_bytes=%zu, max_kbps=%.2f, elapsed=%.6f, expected=%.6f, delay_times=%d, over_slept_us=%llu\n",
+                       accumulated_bytes, max_kbps, elapsed_sec, expected_sec, CBR_delay_times, overslept_us / 1000);
+                CBR_delay_times=0;
+                overslept_us=0;
+            }
+
+            CBR_delay_us += (sleep_ns/1000);
+            CBR_delay_times++;
+
+            // Handle spurious wakeups
+            while (nanosleep(&ts, &rem) == -1 && errno == EINTR) {
+                ts = rem;
+            }
+           
+            uint64_t after_sleep = now_ns();
+            uint64_t actual_ns = after_sleep - now;            
+            overslept_us += (actual_ns - sleep_ns) / 1000;            
+
+            now = after_sleep;  // Update batch timestamp after sleep
         }
-
-        CBR_delay_us += (sleep_ns/1000);
-        CBR_delay_times++;
-
-        // Handle spurious wakeups
-        while (nanosleep(&ts, &rem) == -1 && errno == EINTR) {
-            ts = rem;
-        }
-
-        now = now_ns();  // update after sleeping
     }
 
     // Reset for next batch
