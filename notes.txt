@@ -4,4 +4,12 @@
 /usr/bin/make -j9 CC=/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-gnueabihf-gcc CXX=/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-gnueabihf-g++ LDFLAGS=-s -C /home/home/src/wfb-ng/latest/wfb-ng wfb_tx
 
 
+
+ssc378q Sigmastar6B, these two
+/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast/host/bin/arm-openipc-linux-musleabihf-g++  -Wall -O2 -fno-strict-aliasing -DWFB_VERSION='"2024.02.10-release"' -std=gnu++11 -c -o src/tx.o src/tx.cpp
+/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast/host/bin/arm-openipc-linux-musleabihf-g++ -o wfb_tx src/tx.o src/fec.o src/wifibroadcast.o -s -lrt -lsodium
+
+/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++  -Wall -O2 -fno-strict-aliasing -DWFB_VERSION='"2024.02.10-release"' -std=gnu++11 -c -o src/tx.o src/tx.cpp
+/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++ -o wfb_tx src/tx.o src/fec.o src/wifibroadcast.o -s -lrt -lsodium
+
 scp -O ./wfb_tx root@192.168.1.88:/usr/bin/

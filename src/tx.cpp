@@ -669,7 +669,7 @@ uint32_t extract_rxq_overflow(struct msghdr *msg)
 }
 
 
-#define PACKET_BATCH 40  // Check timing every xx packets
+#define PACKET_BATCH 20  // Check timing every xx packets, 5 ~ 50 seems as appropriate, 40 works nice MCS3
 
 static uint64_t last_batch_ns = 0;
 static size_t accumulated_bytes = 0;
@@ -691,9 +691,9 @@ static double get_max_kbps(int mcs) {
     switch (mcs) {
         case 0: return 5000.0;
         case 1: return 10000.0;
-        case 2: return 15000.0;
-        case 3: return 20000.0;
-        case 4: return 30000.0;
+        case 2: return 15500.0;
+        case 3: return 22000.0;
+        case 4: return 28000.0; //30000.0
         default: return 5000.0;  // fallback for unknown MCS
     }
 }
@@ -724,18 +724,15 @@ void maybe_wait_batch(size_t packet_len) {
     double elapsed_sec = (now - last_batch_ns) / 1e9;    
     double expected_sec = (accumulated_bytes * 8.0) / (max_kbps * 1000.0);//Bits Per Second
 
-
-    if (debug_counter >= 1000) {
-       // printf("DBG (1000th packet): accumulated_bytes=%u, max_kbps=%.2f, elapsed_sec=%.6f, expected_sec=%.6f\n",
-       //        accumulated_bytes, max_kbps, elapsed_sec, expected_sec);
-        debug_counter = 0;
-    }
+    int min_sleep=4000000ULL;
+    if (mcs_index==4)
+        min_sleep=1000000ULL;
 
     if (elapsed_sec < expected_sec) {
         double sleep_sec = expected_sec - elapsed_sec;
         uint64_t sleep_ns = (uint64_t)(sleep_sec * 1e9);
 
-        if (sleep_ns > 5000000ULL) {  // Only sleep if > 5 ms
+        if (sleep_ns > min_sleep) {  // Only sleep if > 5 ms, small sleeps are not handled well by the CPU
 
             struct timespec ts = {
                 .tv_sec = sleep_ns / 1000000000ULL,
@@ -744,7 +741,7 @@ void maybe_wait_batch(size_t packet_len) {
             struct timespec rem;
 
             if (CBR_delay_us==0){                        
-                printf("CBR FIX: accumulated_bytes=%zu, max_kbps=%.2f, elapsed=%.6f, expected=%.6f, delay_times=%d, over_slept_us=%llu\n",
+                printf("CBR FIX: accumulated_bytes=%zu, max_kbps=%.0f, elapsed=%.6f, expected=%.6f, delay_times=%d, over_slept_ms=%llu\n",
                        accumulated_bytes, max_kbps, elapsed_sec, expected_sec, CBR_delay_times, overslept_us / 1000);
                 CBR_delay_times=0;
                 overslept_us=0;
@@ -759,10 +756,13 @@ void maybe_wait_batch(size_t packet_len) {
             }
            
             uint64_t after_sleep = now_ns();
-            uint64_t actual_ns = after_sleep - now;            
+            uint64_t actual_ns = after_sleep - now;
+                        
             overslept_us += (actual_ns - sleep_ns) / 1000;            
 
             now = after_sleep;  // Update batch timestamp after sleep
+        } else{
+
         }
     }
 
@@ -1103,10 +1103,17 @@ void data_source(unique_ptr<Transmitter> &t, vector<int> &rx_fd, int control_fd,
                         // we yield session packets only if there are data packets
                         session_key_announce_ts = cur_ts + SESSION_KEY_ANNOUNCE_MSEC;
                     }
-
-//Here we try to apply CBR logic, not the best place, better to be inside transmitter::send_packet+
+//2025 TEST
+//Here we try to apply CBR logic, not the best place, better to be inside transmitter::send_packet()
                     
-                    mcs_index = t->get_radiotap_header().mcs_index;
+                    mcs_index = t->get_radiotap_header().mcs_index;                    
+                    int _fec_k = 0, _fec_n = 0;                    
+                    t->get_fec(_fec_k, _fec_n);
+                    FEC_coef=(double) _fec_n / _fec_k;
+                    //if (t->get_radiotap_header().bandwidth==40) 40Mhz should have twice the bitrate
+                    //    FEC_coef=FEC_coef/2;
+
+                    //Stop waiting
                     maybe_wait_batch(rsize);
                                         
 
