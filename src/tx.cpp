@@ -315,10 +315,19 @@ void RawSocketTransmitter::inject_packet(const uint8_t *buf, size_t size)
             fd_fwmarks[fd] = fwmark;
         }
 
-        int rc = sendmsg(fd, &msghdr, 0);
-
-        if (rc < 0 && errno != ENOBUFS)
+        int rc = -1;
+        bool ok = false;
+        int retries_left = 10;        
+        for (;;)
         {
+            rc = sendmsg(fd, &msghdr, 0);
+            if (rc >= 0) { ok = true; break; }
+            if (errno == ENOBUFS && true)//add param later to configure this
+            {                
+                if (--retries_left == 0) { ok = false; break;}
+                usleep(5000);        // 5ms
+                continue;            // retry same message
+            }            
             throw runtime_error(string_format("Unable to inject packet: %s", strerror(errno)));
         }
 

@@ -10,11 +10,24 @@
 /home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-gcc  -Wall -O2 -fno-strict-aliasing -DZFEX_UNROLL_ADDMUL_SIMD=8 -DZFEX_USE_INTEL_SSSE3 -DZFEX_USE_ARM_NEON -DZFEX_INLINE_ADDMUL -DZFEX_INLINE_ADDMUL_SIMD -DWFB_VERSION='"2024.02.10-release"' -std=gnu99 -c -o src/radiotap.o src/radiotap.c
 /home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-gcc  -Wall -O2 -fno-strict-aliasing -DZFEX_UNROLL_ADDMUL_SIMD=8 -DZFEX_USE_INTEL_SSSE3 -DZFEX_USE_ARM_NEON -DZFEX_INLINE_ADDMUL -DZFEX_INLINE_ADDMUL_SIMD -DWFB_VERSION='"2024.02.10-release"' -std=gnu99 -c -o src/zfex.o src/zfex.c
 /home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++  -Wall -O2 -fno-strict-aliasing -DZFEX_UNROLL_ADDMUL_SIMD=8 -DZFEX_USE_INTEL_SSSE3 -DZFEX_USE_ARM_NEON -DZFEX_INLINE_ADDMUL -DZFEX_INLINE_ADDMUL_SIMD -DWFB_VERSION='"2024.02.10-release"' -std=gnu++11 -c -o src/wifibroadcast.o src/wifibroadcast.cpp
-
 #rebuild
 /home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++  -Wall -O2 -fno-strict-aliasing -DZFEX_UNROLL_ADDMUL_SIMD=8 -DZFEX_USE_INTEL_SSSE3 -DZFEX_USE_ARM_NEON -DZFEX_INLINE_ADDMUL -DZFEX_INLINE_ADDMUL_SIMD -DWFB_VERSION='"2024.02.10-release"' -std=gnu++11 -c -o src/tx.o src/tx.cpp
 /home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++ -o wfb_tx src/tx.o src/zfex.o src/wifibroadcast.o -s -lrt -lsodium
 
 
+/usr/bin/make -j9 CC=/home/home/src/ssc30kq/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-gcc CXX=/home/home/src/ssc378/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++ LDFLAGS=-s -C /home/home/src/ssc378q/builder/openipc/output/build/wifibroadcast-ng-7ffc689e3f1194dca79dca4b5b56ee560c0cc3be all_bin
+/home/home/src/ssc378/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++  -Wall -O2 -fno-strict-aliasing -DZFEX_UNROLL_ADDMUL_SIMD=8 -DZFEX_USE_INTEL_SSSE3 -DZFEX_USE_ARM_NEON -DZFEX_INLINE_ADDMUL -DZFEX_INLINE_ADDMUL_SIMD -DWFB_VERSION='"2024.02.10-release"' -std=gnu++11 -c -o src/rx.o src/rx.cpp
+/home/home/src/ssc378/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-gcc  -Wall -O2 -fno-strict-aliasing -DZFEX_UNROLL_ADDMUL_SIMD=8 -DZFEX_USE_INTEL_SSSE3 -DZFEX_USE_ARM_NEON -DZFEX_INLINE_ADDMUL -DZFEX_INLINE_ADDMUL_SIMD -DWFB_VERSION='"2024.02.10-release"' -std=gnu99 -c -o src/radiotap.o src/radiotap.c
+/home/home/src/ssc378/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-gcc  -Wall -O2 -fno-strict-aliasing -DZFEX_UNROLL_ADDMUL_SIMD=8 -DZFEX_USE_INTEL_SSSE3 -DZFEX_USE_ARM_NEON -DZFEX_INLINE_ADDMUL -DZFEX_INLINE_ADDMUL_SIMD -DWFB_VERSION='"2024.02.10-release"' -std=gnu99 -c -o src/zfex.o src/zfex.c
+/home/home/src/ssc378/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++  -Wall -O2 -fno-strict-aliasing -DZFEX_UNROLL_ADDMUL_SIMD=8 -DZFEX_USE_INTEL_SSSE3 -DZFEX_USE_ARM_NEON -DZFEX_INLINE_ADDMUL -DZFEX_INLINE_ADDMUL_SIMD -DWFB_VERSION='"2024.02.10-release"' -std=gnu++11 -c -o src/wifibroadcast.o src/wifibroadcast.cpp
+#rebuild
+rm src/tx.o; /home/home/src/ssc378/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++  -Wall -O2 -fno-strict-aliasing -DZFEX_UNROLL_ADDMUL_SIMD=8 -DZFEX_USE_INTEL_SSSE3 -DZFEX_USE_ARM_NEON -DZFEX_INLINE_ADDMUL -DZFEX_INLINE_ADDMUL_SIMD -DWFB_VERSION='"2024.02.10-release"' -std=gnu++11 -c -o src/tx.o src/tx.cpp
+/home/home/src/ssc378/builder/openipc/output/per-package/wifibroadcast-ng/host/bin/arm-openipc-linux-musleabihf-g++ -o wfb_tx src/tx.o src/zfex.o src/wifibroadcast.o -s -lrt -lsodium
+
+ 
+
+
+
 
 scp -O ./wfb_tx root@192.168.1.88:/usr/bin/
+
